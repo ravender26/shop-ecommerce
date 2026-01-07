@@ -7,6 +7,8 @@ import { ShoppingCart, Star, Heart, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { mockProducts } from "@/lib/mock-data";
+import { useCart } from "@/contexts/CartContext";
+import { useWishlist } from "@/contexts/WishlistContext";
 
 interface ProductDetailPageProps {
   params: {
@@ -18,6 +20,9 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const product = mockProducts.find((p) => p.id === params.id);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+  const { addToCart } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const inWishlist = product ? isInWishlist(product.id) : false;
 
   if (!product) {
     return (
@@ -171,12 +176,50 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
 
           {/* Action Buttons */}
           <div className="flex gap-4">
-            <Button size="lg" className="flex-1 group">
+            <Button
+              size="lg"
+              className="flex-1 group"
+              onClick={() => {
+                if (product) {
+                  for (let i = 0; i < quantity; i++) {
+                    addToCart({
+                      id: product.id,
+                      name: product.name,
+                      price: product.price,
+                      salePrice: product.salePrice,
+                      image: product.image,
+                    });
+                  }
+                }
+              }}
+            >
               <ShoppingCart className="mr-2 h-5 w-5" />
               Add to Cart
             </Button>
-            <Button size="lg" variant="outline">
-              <Heart className="h-5 w-5" />
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => {
+                if (product) {
+                  if (inWishlist) {
+                    removeFromWishlist(product.id);
+                  } else {
+                    addToWishlist({
+                      id: product.id,
+                      name: product.name,
+                      price: product.price,
+                      salePrice: product.salePrice,
+                      image: product.image,
+                    });
+                  }
+                }
+              }}
+            >
+              <Heart
+                className={`h-5 w-5 ${
+                  inWishlist ? "fill-red-500 text-red-500" : ""
+                }`}
+              />
             </Button>
           </div>
         </div>

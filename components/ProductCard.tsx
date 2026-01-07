@@ -3,9 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ShoppingCart, Star } from "lucide-react";
+import { ShoppingCart, Star, Heart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useCart } from "@/contexts/CartContext";
+import { useWishlist } from "@/contexts/WishlistContext";
 
 interface Product {
   id: string;
@@ -25,10 +27,39 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, index = 0 }: ProductCardProps) {
+  const { addToCart } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const finalPrice = product.salePrice || product.price;
   const discount = product.salePrice
     ? Math.round(((product.price - product.salePrice) / product.price) * 100)
     : 0;
+  const inWishlist = isInWishlist(product.id);
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      salePrice: product.salePrice,
+      image: product.image,
+    });
+  };
+
+  const handleWishlistToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (inWishlist) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        salePrice: product.salePrice,
+        image: product.image,
+      });
+    }
+  };
 
   return (
     <motion.div
@@ -93,16 +124,27 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                   </span>
                 )}
               </div>
-              <Button
-                size="sm"
-                className="h-9 w-9 rounded-full p-0"
-                onClick={(e) => {
-                  e.preventDefault();
-                  // Add to cart logic here
-                }}
-              >
-                <ShoppingCart className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-9 w-9 rounded-full p-0"
+                  onClick={handleWishlistToggle}
+                >
+                  <Heart
+                    className={`h-4 w-4 ${
+                      inWishlist ? "fill-red-500 text-red-500" : ""
+                    }`}
+                  />
+                </Button>
+                <Button
+                  size="sm"
+                  className="h-9 w-9 rounded-full p-0"
+                  onClick={handleAddToCart}
+                >
+                  <ShoppingCart className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>

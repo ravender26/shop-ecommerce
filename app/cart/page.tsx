@@ -5,32 +5,12 @@ import { ShoppingCart, Plus, Minus, Trash2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
-
-// Mock cart data - in real app, this would come from state/context
-const cartItems = [
-  {
-    id: "1",
-    name: "Premium Stainless Steel Chef Knife",
-    price: 69.99,
-    originalPrice: 89.99,
-    image: "https://images.unsplash.com/photo-1594736797933-d0cbc0b1b4c1?w=200&h=200&fit=crop",
-    quantity: 1,
-  },
-  {
-    id: "2",
-    name: "Silicone Spatula Set",
-    price: 24.99,
-    image: "https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=200&h=200&fit=crop",
-    quantity: 2,
-  },
-];
+import { useCart } from "@/contexts/CartContext";
 
 export default function CartPage() {
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-  const shipping = 10.00;
+  const { cartItems, updateQuantity, removeFromCart, getTotalPrice } = useCart();
+  const subtotal = getTotalPrice();
+  const shipping = 10.0;
   const total = subtotal + shipping;
 
   return (
@@ -77,22 +57,23 @@ export default function CartPage() {
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg mb-1">{item.name}</h3>
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-xl font-bold text-primary">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-xl font-bold text-primary">
+                      ${(item.salePrice || item.price).toFixed(2)}
+                    </span>
+                    {item.salePrice && (
+                      <span className="text-sm text-muted-foreground line-through">
                         ${item.price.toFixed(2)}
                       </span>
-                      {item.originalPrice && (
-                        <span className="text-sm text-muted-foreground line-through">
-                          ${item.originalPrice.toFixed(2)}
-                        </span>
-                      )}
-                    </div>
+                    )}
+                  </div>
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-2 border rounded-md">
                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8"
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
                         >
                           <Minus className="h-4 w-4" />
                         </Button>
@@ -101,11 +82,17 @@ export default function CartPage() {
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8"
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
                         >
                           <Plus className="h-4 w-4" />
                         </Button>
                       </div>
-                      <Button variant="ghost" size="sm" className="text-red-600">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600"
+                        onClick={() => removeFromCart(item.id)}
+                      >
                         <Trash2 className="h-4 w-4 mr-2" />
                         Remove
                       </Button>
