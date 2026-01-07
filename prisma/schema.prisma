@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = "postgres://4283932146bee0058e93d6c1e5d7b2542f4a64fb896d7153b8c7c9647722a609:sk_b4DpjeVaa7ODujDIVlBS6@db.prisma.io:5432/postgres?sslmode=require"
 }
 
 model User {
@@ -24,7 +24,7 @@ model User {
 model Product {
   id           String   @id @default(cuid())
   name         String
-  description  String   @db.Text
+  description  String
   price        Float
   category     String
   images       String   // JSON array stored as string (SQLite limitation)
